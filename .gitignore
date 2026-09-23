@@ -1,0 +1,45 @@
+# Unity generated
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+/[Uu]serSettings/
+.vs/
+
+# Visual Studio / Rider generated
+.vscode/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+*.slnx
+
+# OS generated
+.DS_Store
+Thumbs.db
+
+# 유니티 에디터 충돌 복구 데이터
+/Assets/_Recovery/
+
+# Backup files this project has accumulated
+*.orig.bak
+video_original_backup.mp4
+
+# 용량이 큰 테스트용 곡 파일 (영상/음악) - GitHub 100MB 제한 때문에 제외
+# bitmap.txt(채보)는 작아서 그대로 커밋됨
+Assets/StreamingAssets/map/**/*.wav
+Assets/StreamingAssets/map/**/*.mp4
