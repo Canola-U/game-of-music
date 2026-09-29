@@ -6,12 +6,14 @@ public class VideoManager : MonoBehaviour
 {
     public static VideoManager instance;
     private VideoPlayer player;
+    private RenderTexture targetTexture;
     private Transform quadTransform;
     private MeshRenderer quadRenderer;
     private Material quadMaterial;
     public bool videoReady = false;
+
     private bool hasVideo = false;
-    private Texture2D imageTexture;   // 영상 대신 사진을 배경으로 쓸 때
+    private bool firstFrameLogged = false;
 
     void Awake()
     {
@@ -21,8 +23,24 @@ public class VideoManager : MonoBehaviour
             DontDestroyOnLoad(gameObject);
 
             player = GetComponent<VideoPlayer>();
+            if (player == null) player = gameObject.AddComponent<VideoPlayer>();
+
+            player.playOnAwake = false;
+            player.waitForFirstFrame = false;
+            player.isLooping = true;
+            player.skipOnDrop = true;
+            player.source = VideoSource.Url;
+            // frameReady 이벤트는 기본값이 false라서 켜주지 않으면 OnFrameReady가 절대 호출되지 않는다
+            player.sendFrameReadyEvents = true;
+
+            // 영상에 들어있는 오디오 트랙은 안 쓴다 (오디오는 AudioManager가 따로 재생함).
+            // 지금까지 Direct 모드로 오디오까지 디코딩하고 있었는데, 이게 영상 프레임 디코딩과
+            // 리소스를 다퉈서 불안정했을 가능성이 있어 확실히 꺼둔다
+            player.audioOutputMode = VideoAudioOutputMode.None;
+
             player.errorReceived += OnVideoError;
-            player.renderMode = VideoRenderMode.APIOnly;
+            player.prepareCompleted += OnPrepared;
+            player.frameReady += OnFrameReady;
 
             // 스프라이트 대신 Quad를 써서 UV가 항상 텍스처 전체(0~1)를 그대로 사용하게 함
             GameObject quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
@@ -33,10 +51,28 @@ public class VideoManager : MonoBehaviour
             quad.transform.localRotation = Quaternion.identity;
 
             quadTransform = quad.transform;
+            quadTransform.localPosition = new Vector3(0f, 0f, 5f);
             quadRenderer = quad.GetComponent<MeshRenderer>();
+            quadRenderer.enabled = false;
 
-            quadMaterial = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
-            quadRenderer.material = quadMaterial;
+            Debug.Log($"[VideoManager] Quad 생성: name={quad.name}, renderer={quadRenderer}, active={quad.activeInHierarchy}, parent={quad.transform.parent.name}");
+
+            Shader unlitShader = Shader.Find("Universal Render Pipeline/Unlit");
+            Debug.Log($"[VideoManager] Shader 찾기: unlitShader={unlitShader}");
+
+            if (unlitShader != null)
+            {
+                quadMaterial = new Material(unlitShader);
+                Debug.Log($"[VideoManager] Material 생성: {quadMaterial}");
+
+                Debug.Log($"[VideoManager] 적용 전: renderer.material={quadRenderer.material}");
+                quadRenderer.material = quadMaterial;
+                Debug.Log($"[VideoManager] 적용 후: renderer.material={quadRenderer.material}");
+            }
+            else
+            {
+                Debug.LogError("[VideoManager] Universal Render Pipeline/Unlit 셰이더를 못 찾았어. 배경 영상 없이 진행");
+            }
         }
         else
         {
@@ -47,83 +83,75 @@ public class VideoManager : MonoBehaviour
     public void LoadVideo(string songFolder)
     {
         videoReady = false;
+        hasVideo = false;
+        firstFrameLogged = false;
+        quadRenderer.enabled = false;
         player.Stop();
-
-        ReleaseImage();
 
         string folder = SongMedia.FolderPath(songFolder);
         string filePath = Path.Combine(folder, "video.mp4");
 
         if (!File.Exists(filePath))
         {
-            // 영상 대신 사진이 있으면 사진을 배경으로 깐다
-            string imagePath = SongMedia.FindImage(folder, "bg");
-            if (imagePath != null && ShowImage(imagePath)) return;
-
-            // 둘 다 없으면 배경 없이 바로 시작할 수 있게 준비 완료 처리
-            Debug.Log($"[VideoManager] 영상/사진 없음, 배경 없이 진행: {folder}");
-            SetNoVideo();
+            Debug.Log($"[VideoManager] video.mp4 없음, 배경 없이 진행: {filePath}");
+            videoReady = true;
             return;
         }
 
-        hasVideo = true;
-        lastBoundTexture = null;
-        quadRenderer.enabled = true;
+        // APIOnly 모드: VideoPlayer가 내부적으로만 디코딩하고,
+        // 매 프레임마다 player.texture를 직접 Material에 할당한다
+        player.renderMode = VideoRenderMode.APIOnly;
         player.url = filePath;
-        player.isLooping = true;
 
-        player.prepareCompleted -= OnPrepared;
-        player.prepareCompleted += OnPrepared;
-
-        Debug.Log($"[VideoManager] LoadVideo url={filePath} (exists={File.Exists(filePath)})");
+        Debug.Log($"[VideoManager] Prepare 시작: {filePath}");
         player.Prepare();
     }
 
     void OnVideoError(VideoPlayer vp, string message)
     {
         Debug.LogError($"[VideoManager] errorReceived: {message}");
-
-        // 영상이 깨져 있어도 게임은 멈추지 않고 배경 없이 진행
-        if (!videoReady) SetNoVideo();
-    }
-
-    bool ShowImage(string imagePath)
-    {
-        imageTexture = SongMedia.LoadImage(imagePath);
-        if (imageTexture == null) return false;
-
-        hasVideo = false;
-        player.Stop();
-        lastBoundTexture = null;
-        quadMaterial.mainTexture = imageTexture;
-        FitToScreen(imageTexture.width, imageTexture.height);
-        quadRenderer.enabled = true;
-        videoReady = true;
-        Debug.Log($"[VideoManager] 사진 배경 사용: {imagePath}");
-        return true;
-    }
-
-    void ReleaseImage()
-    {
-        if (imageTexture == null) return;
-        if (quadMaterial.mainTexture == imageTexture) quadMaterial.mainTexture = null;
-        Destroy(imageTexture);
-        imageTexture = null;
-    }
-
-    void SetNoVideo()
-    {
-        hasVideo = false;
-        player.Stop();
-        quadRenderer.enabled = false;
-        videoReady = true;
+        if (!videoReady)
+        {
+            hasVideo = false;
+            videoReady = true;
+        }
     }
 
     void OnPrepared(VideoPlayer vp)
     {
-        Debug.Log($"[VideoManager] OnPrepared, clip size={vp.width}x{vp.height}");
-        FitToScreen((int)vp.width, (int)vp.height);
+        int w = (int)vp.width;
+        int h = (int)vp.height;
+        Debug.Log($"[VideoManager] Prepare 완료: {w}x{h}, frameCount={vp.frameCount}, frameRate={vp.frameRate}, isPrepared={vp.isPrepared}");
+
+        if (w <= 0 || h <= 0 || quadMaterial == null)
+        {
+            Debug.LogError("[VideoManager] 배경을 표시할 수 없어서 (영상 크기 이상 또는 셰이더 없음) 배경 없이 진행");
+            hasVideo = false;
+            videoReady = true;
+            return;
+        }
+
+        // APIOnly 모드에서는 RenderTexture를 만들지 않음.
+        // 매 프레임마다 player.texture를 직접 할당한다.
+
+        FitToScreen(w, h);
+
+        // 테스트: 스케일을 줄여서 카메라 범위 안에 들어오도록
+        quadTransform.localScale *= 0.4f;
+
+        quadRenderer.enabled = true;
+        hasVideo = true;
         videoReady = true;
+
+        Debug.Log($"[VideoManager] Quad 설정 완료: worldPos={quadTransform.position}, scale={quadTransform.localScale}, renderer.enabled={quadRenderer.enabled}, material={quadRenderer.material.name}");
+        Debug.Log($"[VideoManager] Camera: pos={Camera.main.transform.position}, orthographic={Camera.main.orthographic}, orthographicSize={Camera.main.orthographicSize}, far={Camera.main.farClipPlane}");
+    }
+
+    void OnFrameReady(VideoPlayer vp, long frameIdx)
+    {
+        if (firstFrameLogged) return;
+        firstFrameLogged = true;
+        Debug.Log($"[VideoManager] 첫 프레임 도착: frameIdx={frameIdx}, isPlaying={vp.isPlaying}");
     }
 
     void FitToScreen(int w, int h)
@@ -144,25 +172,22 @@ public class VideoManager : MonoBehaviour
         Debug.Log($"[VideoManager] FitToScreen scale={scale}");
     }
 
-    Texture lastBoundTexture = null;
     void Update()
     {
-        // VideoPlayer가 내부적으로 들고 있는 디코딩 텍스처를 매 프레임 그대로 따라가서 붙임
-        // (백엔드에 따라 텍스처 객체 자체가 바뀔 수 있어서 계속 확인)
-        // 사진 배경일 때는 영상 텍스처로 덮어쓰지 않음
-        if (hasVideo && player != null && player.texture != null && player.texture != lastBoundTexture)
+        if (hasVideo && player.texture != null)
         {
-            lastBoundTexture = player.texture;
-            quadMaterial.mainTexture = lastBoundTexture;
-            Debug.Log($"[VideoManager] rebound texture={lastBoundTexture} ({lastBoundTexture.width}x{lastBoundTexture.height})");
+            // URP Unlit 셰이더는 _BaseMap을 직접 써야 함
+            quadMaterial.SetTexture("_BaseMap", player.texture);
         }
     }
 
     public void Play()
     {
-        if (!hasVideo) return;
-        player.Play();
-        Debug.Log($"[VideoManager] Play() called, isPlaying={player.isPlaying}, texture={player.texture}");
+        if (hasVideo)
+        {
+            player.Play();
+            Debug.Log($"[VideoManager] Play() 호출, isPlaying={player.isPlaying}, isPrepared={player.isPrepared}");
+        }
     }
 
     public void Pause()
