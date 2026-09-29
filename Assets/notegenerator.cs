@@ -6,7 +6,7 @@ public class notegenerator : MonoBehaviour
     public GameObject note;
     public GameObject longnote;
     float notey = 10f;
-    float[] notex = { -9.3f, -8.1f, -6.9f, -5.7f };
+    float[] notex = { -7.3f, -6.1f, -4.9f, -3.7f };
 
     private note_load loader;
     private List<note_data> notes;

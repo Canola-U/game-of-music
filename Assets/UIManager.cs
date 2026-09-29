@@ -44,8 +44,13 @@ public class UIManager : MonoBehaviour
         Vector3 topScreen = Camera.main.WorldToScreenPoint(new Vector3(bounds.max.x, bounds.max.y, 0f));
         Vector3 bottomScreen = Camera.main.WorldToScreenPoint(new Vector3(bounds.max.x, bounds.min.y, 0f));
 
-        float barX = topScreen.x + hpBarGap;
-        float barBottomY = bottomScreen.y;
+        // 16:9 레터박스 때문에 카메라 영역이 화면 가운데로 밀려 있으면, 그만큼 빼서 Canvas 기준 좌표로 바꿈
+        Vector2 viewportOrigin = Camera.main.pixelRect.position;
+        Canvas canvas = hpBarRect.GetComponentInParent<Canvas>();
+        float scale = canvas != null ? canvas.scaleFactor : 1f;
+
+        float barX = (topScreen.x - viewportOrigin.x) / scale + hpBarGap;
+        float barBottomY = (bottomScreen.y - viewportOrigin.y) / scale;
 
         hpBarRect.anchoredPosition = new Vector2(barX, barBottomY + hpBarRect.sizeDelta.y / 2f);
     }

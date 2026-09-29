@@ -8,6 +8,11 @@ public class ScoreManager : MonoBehaviour
     public int combo = 0;
     public int maxCombo = 0;
 
+    public int perfectCount = 0;
+    public int greatCount = 0;
+    public int goodCount = 0;
+    public int missCount = 0;
+
     private float totalPercent = 0f;
     private int noteCount = 0;
 
@@ -38,6 +43,14 @@ public class ScoreManager : MonoBehaviour
         float percent = GradeToPercent(grade);
         totalPercent += percent;
         noteCount++;
+
+        switch (grade)
+        {
+            case "Perfect": perfectCount++; break;
+            case "Great": greatCount++; break;
+            case "Good": goodCount++; break;
+            default: missCount++; break;
+        }
 
         if (grade == "Miss")
         {
@@ -86,6 +99,10 @@ public class ScoreManager : MonoBehaviour
     {
         combo = 0;
         maxCombo = 0;
+        perfectCount = 0;
+        greatCount = 0;
+        goodCount = 0;
+        missCount = 0;
         totalPercent = 0f;
         noteCount = 0;
         hp = maxHp;
