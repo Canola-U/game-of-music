@@ -17,28 +17,35 @@ public class longnoteController : MonoBehaviour
 
     private float baseHeight;
     private SpriteRenderer bodySr;
+    private float appliedSpeed = -1f;
 
     public void Init(note_data data)
     {
         noteinfo = data;
 
-        float durationSec = (data.end_time - data.start_time) / 1000f;
-        float fullLength = durationSec * global.instance.notespeed;
-
         if (body != null)
         {
             bodySr = body.GetComponent<SpriteRenderer>();
             baseHeight = bodySr.sprite.bounds.size.y;
-
-            Vector3 scale = body.localScale;
-            scale.y = fullLength / baseHeight;
-            body.localScale = scale;
-
             body.localPosition = Vector3.zero;
             bodySr.maskInteraction = SpriteMaskInteraction.None;
         }
 
+        UpdateBodyLength();
         UpdatePosition();
+    }
+
+    // 몸통 길이 = 누르는 시간 × 노트 속도. 게임 중에 속도를 바꾸면 이미 내려오는 롱노트도 다시 맞춘다
+    void UpdateBodyLength()
+    {
+        float speed = global.instance.notespeed;
+        if (body == null || Mathf.Approximately(speed, appliedSpeed)) return;
+        appliedSpeed = speed;
+
+        float durationSec = (noteinfo.end_time - noteinfo.start_time) / 1000f;
+        Vector3 scale = body.localScale;
+        scale.y = durationSec * speed / baseHeight;
+        body.localScale = scale;
     }
 
     void OnEnable()
@@ -69,6 +76,7 @@ public class longnoteController : MonoBehaviour
     {
         if (judged) return;
 
+        UpdateBodyLength();
         UpdatePosition();
 
         float songTimeMs = AudioManager.instance.TimeMs;

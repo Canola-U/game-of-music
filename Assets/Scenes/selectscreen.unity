@@ -168,7 +168,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0.05, g: 0.05, b: 0.08, a: 0.55}
@@ -206,7 +206,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3312d7739989d2b4e91e6319e9a96d76, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.RectMask2D
   m_Padding: {x: 0, y: 0, z: 0, w: 0}
   m_Softness: {x: 0, y: 0}
@@ -300,7 +300,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0.9, g: 0.9, b: 0.93, a: 1}
@@ -375,7 +375,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -387,8 +387,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: SELECT SONG
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: e1f11973907c0564abb3f677de343c3f, type: 2}
-  m_sharedMaterial: {fileID: 6362091276419765385, guid: e1f11973907c0564abb3f677de343c3f, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 4fdee7d1517a33243b5302820c876d61, type: 2}
+  m_sharedMaterial: {fileID: 103816573573820926, guid: 4fdee7d1517a33243b5302820c876d61, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -512,7 +512,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -524,8 +524,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Song Title
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: e1f11973907c0564abb3f677de343c3f, type: 2}
-  m_sharedMaterial: {fileID: 6362091276419765385, guid: e1f11973907c0564abb3f677de343c3f, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 4fdee7d1517a33243b5302820c876d61, type: 2}
+  m_sharedMaterial: {fileID: 103816573573820926, guid: 4fdee7d1517a33243b5302820c876d61, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -649,7 +649,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -661,8 +661,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Normal   BPM 120
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: e1f11973907c0564abb3f677de343c3f, type: 2}
-  m_sharedMaterial: {fileID: 6362091276419765385, guid: e1f11973907c0564abb3f677de343c3f, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 4fdee7d1517a33243b5302820c876d61, type: 2}
+  m_sharedMaterial: {fileID: 103816573573820926, guid: 4fdee7d1517a33243b5302820c876d61, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -786,7 +786,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -796,10 +796,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '?�↓ ?�동     ENTER ?�택'
+  m_text: "?\uFFFD\u2193 ?\uFFFD\uB3D9     ENTER ?\uFFFD\uD0DD"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: e1f11973907c0564abb3f677de343c3f, type: 2}
-  m_sharedMaterial: {fileID: 6362091276419765385, guid: e1f11973907c0564abb3f677de343c3f, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 4fdee7d1517a33243b5302820c876d61, type: 2}
+  m_sharedMaterial: {fileID: 103816573573820926, guid: 4fdee7d1517a33243b5302820c876d61, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -923,7 +923,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0.6, g: 0.6, b: 0.8, a: 1}
@@ -998,7 +998,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -1010,8 +1010,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: MY RECORDS
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: e1f11973907c0564abb3f677de343c3f, type: 2}
-  m_sharedMaterial: {fileID: 6362091276419765385, guid: e1f11973907c0564abb3f677de343c3f, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 4fdee7d1517a33243b5302820c876d61, type: 2}
+  m_sharedMaterial: {fileID: 103816573573820926, guid: 4fdee7d1517a33243b5302820c876d61, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1145,7 +1145,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a2fb7f452ed99f04aa7b1d1906bdc335, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SongSelectUI
   songButtonPrefab: {fileID: 7914399179521877258, guid: 5615f3a0c8cc0ad4a8422e03644413b7, type: 3}
   listParent: {fileID: 548808735}
@@ -1157,6 +1157,9 @@ MonoBehaviour:
   infoText: {fileID: 900000043}
   rankListParent: {fileID: 900000081}
   rankRowHeight: 26
+  previewDelay: 0.3
+  previewVolume: 0.8
+  previewFadeIn: 0.5
 --- !u!114 &1010442842
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1167,7 +1170,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.GraphicRaycaster
   m_IgnoreReversedGraphics: 1
   m_BlockingObjects: 0
@@ -1184,7 +1187,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.CanvasScaler
   m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
@@ -1277,7 +1280,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 01614664b831546d2ae94a42149d80ac, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.UI.InputSystemUIInputModule
   m_SendPointerHoverToParent: 1
   m_MoveRepeatDelay: 0.5
@@ -1308,7 +1311,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 76c392e42b5098c458856cdf6ecaaaa1, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.EventSystems.EventSystem
   m_FirstSelected: {fileID: 0}
   m_sendNavigationEvents: 1

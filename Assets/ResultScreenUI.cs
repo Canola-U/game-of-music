@@ -6,42 +6,18 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using TMPro;
+using Tier = RankTable.Tier;
 
 // 결과 화면 UI를 실행할 때 코드로 만든다.
 // 왼쪽: 티어 표 / 가운데: 판정 비율 원 + 이번 판 티어 / 오른쪽: 판정 표
-// S: 기록 저장 팝업, R: 재도전, ENTER/ESC: 곡 선택
+// S: 기록 저장 팝업, F5: 재도전, ENTER/ESC: 곡 선택
 public class ResultScreenUI : MonoBehaviour
 {
-    [System.Serializable]
-    public class Tier
-    {
-        public string name;
-        public float minAccuracy;   // 이 정확도(%) 이상이면 이 티어
-        public Color color;
-
-        public Tier(string name, float minAccuracy, Color color)
-        {
-            this.name = name;
-            this.minAccuracy = minAccuracy;
-            this.color = color;
-        }
-    }
-
     [Header("비워두면 씬에 있던 기존 텍스트의 폰트를 사용")]
     public TMP_FontAsset font;
 
-    [Header("티어 (높은 티어부터 순서대로)")]
-    public List<Tier> tiers = new List<Tier>
-    {
-        new Tier("SSS", 99f, Hex(0xFFF1A8)),
-        new Tier("SS", 97f, Hex(0xFFD54F)),
-        new Tier("S", 95f, Hex(0xFFB300)),
-        new Tier("A", 90f, Hex(0xBA68C8)),
-        new Tier("B", 80f, Hex(0x64B5F6)),
-        new Tier("C", 70f, Hex(0x81C784)),
-        new Tier("D", 60f, Hex(0xA1887F)),
-        new Tier("F", 0f, Hex(0x757575)),
-    };
+    // 티어 이름/커트라인/색은 RankTable.cs에서 바꾼다 (화면 전환과 같이 씀)
+    static List<Tier> tiers => RankTable.tiers;
 
     [Header("판정 색 (원과 표에 같이 쓰임)")]
     public Color perfectColor = Hex(0xFFD54F);
@@ -49,7 +25,7 @@ public class ResultScreenUI : MonoBehaviour
     public Color goodColor = Hex(0x81C784);
     public Color missColor = Hex(0xEF5350);
 
-    static readonly Color godColor = Hex(0xFF1744);
+    static readonly Color godColor = RankTable.godColor;
     static readonly Color bgColor = Hex(0x0E0E14);
     static readonly Color panelColor = Hex(0x1B1B24);
     static readonly Color keyColor = Hex(0x2A2A35);
@@ -104,8 +80,8 @@ public class ResultScreenUI : MonoBehaviour
         ScoreManager sm = ScoreManager.instance;
         accuracy = sm.AverageAccuracy;
         score = Mathf.RoundToInt(accuracy * 10000f);
-        tier = GetTier(accuracy);
-        isPerfect = accuracy >= 100f;
+        tier = RankTable.Get(accuracy);
+        isPerfect = RankTable.IsGod(accuracy);
 
         List<ScoreRecord> records = HighScoreManager.GetRecords(SongSelection.songFolder);
         isNewRecord = records.Count == 0 || accuracy > records[0].accuracy;
@@ -119,15 +95,6 @@ public class ResultScreenUI : MonoBehaviour
         BuildSavePopup();
 
         StartCoroutine(PlayIntro());
-    }
-
-    Tier GetTier(float acc)
-    {
-        foreach (Tier t in tiers)
-        {
-            if (acc >= t.minAccuracy) return t;
-        }
-        return tiers[tiers.Count - 1];
     }
 
     // ───────────────────────── 입력 ─────────────────────────
@@ -153,7 +120,7 @@ public class ResultScreenUI : MonoBehaviour
         {
             OpenPopup();
         }
-        else if (Input.GetKeyDown(KeyCode.R))
+        else if (Input.GetKeyDown(KeyCode.F5))
         {
             leaving = true;
             SceneFlow.instance.RetrySong();
@@ -301,7 +268,7 @@ public class ResultScreenUI : MonoBehaviour
     void BuildHeader()
     {
         string folder = SongSelection.songFolder;
-        SongInfo info = SongInfo.LoadFrom(Path.Combine(Application.streamingAssetsPath, "map", folder));
+        SongInfo info = SongInfo.LoadFrom(SongMedia.FolderPath(folder));
         string title = string.IsNullOrEmpty(info.title) ? folder : info.title;
 
         RectTransform header = MakeRect("Header", transform, new Vector2(0f, -90f), new Vector2(1200f, 140f));
@@ -453,7 +420,7 @@ public class ResultScreenUI : MonoBehaviour
         SetAnchor(bar, new Vector2(0.5f, 0f));
 
         saveHintLabel = MakeKeyHint(bar, "S", "기록 저장", new Vector2(-400f, 0f));
-        MakeKeyHint(bar, "R", "재도전", new Vector2(0f, 0f));
+        MakeKeyHint(bar, "F5", "재도전", new Vector2(0f, 0f));
         MakeKeyHint(bar, "ENTER", "곡 선택", new Vector2(400f, 0f));
 
         toastText = MakeText(transform, "", 30, Color.white, TextAlignmentOptions.Center, new Vector2(0f, 130f), new Vector2(800f, 50f));

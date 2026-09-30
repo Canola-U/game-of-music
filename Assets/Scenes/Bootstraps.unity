@@ -237,7 +237,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 52a38a24062f2334faac3bf4767632c0, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.335849, g: 0.335849, b: 0.335849, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -381,6 +381,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c91c4877e4bcd14479227c6d88416b67, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneFlow
+  transitionDuration: 0.35
+  stripStagger: 0.035
+  accentLead: 0.06
+  minHoldTime: 0.3
+  rankHoldTime: 0.9
+  godHoldTime: 1.5
 --- !u!4 &1135039341
 Transform:
   m_ObjectHideFlags: 0
@@ -427,6 +433,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScoreManager
   combo: 0
   maxCombo: 0
+  perfectCount: 0
+  greatCount: 0
+  goodCount: 0
+  missCount: 0
   hp: 10
   isGameOver: 0
 --- !u!4 &1341774327

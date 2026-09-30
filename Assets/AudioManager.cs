@@ -33,8 +33,9 @@ public class AudioManager : MonoBehaviour
 
     IEnumerator LoadRoutine(string songFolder)
     {
-        string filePath = Path.Combine(Application.streamingAssetsPath, "map", songFolder, "song.wav");
-        string url = "file://" + filePath;
+        string filePath = Path.Combine(SongMedia.FolderPath(songFolder), "song.wav");
+        // 한글/공백/# 같은 문자가 들어간 폴더 이름도 되도록 URL로 제대로 변환
+        string url = new System.Uri(filePath).AbsoluteUri;
 
         using (UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(url, AudioType.WAV))
         {
@@ -104,7 +105,8 @@ public class AudioManager : MonoBehaviour
                 cachedFrame = Time.frameCount;
                 UpdateSmoothTime();
             }
-            return (float)(smoothTime * 1000.0);
+            // 싱크 보정: 소리가 늦게 들리는 환경이면 곡 시간을 그만큼 늦춰서 노트/판정/영상을 같이 민다
+            return (float)(smoothTime * 1000.0) - SyncOffset.Ms;
         }
     }
 
