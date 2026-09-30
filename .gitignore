@@ -43,3 +43,8 @@ video_original_backup.mp4
 # bitmap.txt(채보)는 작아서 그대로 커밋됨
 Assets/StreamingAssets/map/**/*.wav
 Assets/StreamingAssets/map/**/*.mp4
+Assets/StreamingAssets/map/**/*.webm
+
+# 곡별 순위 기록 (플레이어마다 다름)
+Assets/StreamingAssets/map/**/records.txt
+Assets/StreamingAssets/map/**/records.txt.meta

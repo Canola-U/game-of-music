@@ -24,7 +24,7 @@ public class SongSelectUI : MonoBehaviour
     public RectTransform rankListParent;
     public float rankRowHeight = 26f;
 
-    [Header("하이라이트 미리보기 (곡 폴더의 preview.mp4 / preview.wav)")]
+    [Header("하이라이트 미리보기 (곡 폴더의 preview.webm·mp4 / preview.wav)")]
     public float previewDelay = 0.3f;     // 선택이 이 시간(초) 동안 멈춰 있어야 불러옴
     public float previewVolume = 0.8f;
     public float previewFadeIn = 0.5f;
@@ -39,6 +39,7 @@ public class SongSelectUI : MonoBehaviour
     private bool videoPrepared;
     private bool videoFailed;
 
+    private KeyBindPopup keyBindPopup;
     private List<SongInfo> songs = new List<SongInfo>();
     private List<GameObject> buttons = new List<GameObject>();
     private List<GameObject> rankRows = new List<GameObject>();
@@ -52,9 +53,15 @@ public class SongSelectUI : MonoBehaviour
         float viewportHeight = viewport != null ? viewport.rect.height : itemHeight;
         centerOffset = viewportHeight / 2f - itemHeight / 2f;
 
+        keyBindPopup = gameObject.AddComponent<KeyBindPopup>();
         SetupPreview();
         LoadSongList();
         BuildUI();
+
+        // 유저가 새로 넣은 mp4가 있으면 webm 변환을 시작하고, 끝나면 미리보기를 갱신
+        if (SongVideoConverter.instance != null) SongVideoConverter.instance.Scan();
+        SongVideoConverter.Converted += OnVideoConverted;
+
         UpdateSelectionVisual();
         targetY = selectedIndex * itemHeight - centerOffset;
         listParent.anchoredPosition = new Vector2(listParent.anchoredPosition.x, targetY);
@@ -62,7 +69,7 @@ public class SongSelectUI : MonoBehaviour
 
     void LoadSongList()
     {
-        string mapPath = Path.Combine(Application.streamingAssetsPath, "map");
+        string mapPath = SongMedia.MapRoot;
 
         if (!Directory.Exists(mapPath))
         {
@@ -115,6 +122,23 @@ public class SongSelectUI : MonoBehaviour
 
     void Update()
     {
+        // 키 설정 창이 떠 있는 동안(또는 방금 ESC로 닫은 프레임)에는 곡 선택 입력을 받지 않는다
+        if (keyBindPopup.IsOpen || keyBindPopup.ClosedThisFrame) return;
+
+        // J: 키 설정
+        if (Input.GetKeyDown(KeyCode.J))
+        {
+            keyBindPopup.Open();
+            return;
+        }
+
+        // ESC: 시작 화면으로 (곡이 하나도 없어도 나갈 수 있게 가장 먼저 확인)
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            SceneFlow.instance.GoToStart();
+            return;
+        }
+
         if (songs.Count == 0) return;
 
         if (Input.GetKeyDown(KeyCode.UpArrow))
@@ -131,13 +155,105 @@ public class SongSelectUI : MonoBehaviour
         }
         else if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Space))
         {
-            SceneFlow.instance.StartSong(songs[selectedIndex].folderName);
+            string missing = MissingFiles(songs[selectedIndex]);
+            if (missing != null)
+                ShowWarning(missing + "가 없습니다");
+            else
+                SceneFlow.instance.StartSong(songs[selectedIndex].folderName);
         }
+
+        RefreshInfoText();
 
         // 목표 위치로 부드럽게 이동
         float currentY = listParent.anchoredPosition.y;
         float newY = Mathf.Lerp(currentY, targetY, moveSpeed * Time.deltaTime);
         listParent.anchoredPosition = new Vector2(listParent.anchoredPosition.x, newY);
+    }
+
+    // 플레이에 꼭 필요한 파일 중 없는 것 (다 있으면 null)
+    string MissingFiles(SongInfo song)
+    {
+        string folder = SongMedia.FolderPath(song.folderName);
+        List<string> missing = new List<string>();
+        if (!File.Exists(Path.Combine(folder, "song.wav"))) missing.Add("song.wav");
+        if (!File.Exists(Path.Combine(folder, "bitmap.txt"))) missing.Add("bitmap.txt");
+        return missing.Count > 0 ? string.Join(", ", missing) : null;
+    }
+
+    // ───── 안내 메시지 (잠깐 떴다가 사라짐) ─────
+
+    const float warningShowTime = 1.2f;
+    const float warningFadeTime = 0.4f;
+
+    private CanvasGroup warningGroup;
+    private TextMeshProUGUI warningText;
+    private Coroutine warningRoutine;
+
+    void ShowWarning(string message)
+    {
+        if (warningGroup == null) BuildWarning();
+        if (warningGroup == null) return;
+
+        warningText.text = message;
+        warningGroup.transform.SetAsLastSibling();
+        if (warningRoutine != null) StopCoroutine(warningRoutine);
+        warningRoutine = StartCoroutine(WarningRoutine());
+    }
+
+    IEnumerator WarningRoutine()
+    {
+        warningGroup.alpha = 1f;
+        yield return new WaitForSeconds(warningShowTime);
+
+        float elapsed = 0f;
+        while (elapsed < warningFadeTime)
+        {
+            elapsed += Time.deltaTime;
+            warningGroup.alpha = 1f - elapsed / warningFadeTime;
+            yield return null;
+        }
+        warningGroup.alpha = 0f;
+        warningRoutine = null;
+    }
+
+    void BuildWarning()
+    {
+        Canvas canvas = listParent.GetComponentInParent<Canvas>();
+        if (canvas == null) return;
+        Transform root = canvas.rootCanvas.transform;
+
+        GameObject box = new GameObject("MissingFileWarning", typeof(RectTransform));
+        box.layer = root.gameObject.layer;
+        box.transform.SetParent(root, false);
+
+        RectTransform boxRect = box.GetComponent<RectTransform>();
+        boxRect.anchorMin = boxRect.anchorMax = boxRect.pivot = new Vector2(0.5f, 0.5f);
+        boxRect.sizeDelta = new Vector2(640f, 96f);
+
+        Image bg = box.AddComponent<Image>();
+        bg.color = new Color(0f, 0f, 0f, 0.8f);
+        bg.raycastTarget = false;
+
+        warningGroup = box.AddComponent<CanvasGroup>();
+        warningGroup.alpha = 0f;
+        warningGroup.blocksRaycasts = false;
+        warningGroup.interactable = false;
+
+        GameObject textGo = new GameObject("Text", typeof(RectTransform));
+        textGo.layer = box.layer;
+        textGo.transform.SetParent(box.transform, false);
+
+        RectTransform textRect = textGo.GetComponent<RectTransform>();
+        textRect.anchorMin = Vector2.zero;
+        textRect.anchorMax = Vector2.one;
+        textRect.offsetMin = textRect.offsetMax = Vector2.zero;
+
+        warningText = textGo.AddComponent<TextMeshProUGUI>();
+        if (bigTitleText != null) warningText.font = bigTitleText.font;
+        warningText.fontSize = 36;
+        warningText.color = new Color(1f, 0.45f, 0.45f);
+        warningText.alignment = TextAlignmentOptions.Center;
+        warningText.raycastTarget = false;
     }
 
     void UpdateSelectionVisual()
@@ -157,10 +273,37 @@ public class SongSelectUI : MonoBehaviour
         if (backgroundPanel != null) backgroundPanel.color = Color.Lerp(accent, Color.white, 0.55f);
         if (albumArtPanel != null) albumArtPanel.color = accent;
         if (bigTitleText != null) bigTitleText.text = string.IsNullOrEmpty(selected.title) ? selected.folderName : selected.title;
-        if (infoText != null) infoText.text = $"{selected.difficulty}   BPM {selected.bpm}";
+        infoBase = $"{selected.difficulty}   BPM {selected.bpm}";
+        RefreshInfoText();
 
         RebuildRankList(selected);
         RequestPreview(selected);
+    }
+
+    // ───── 영상 자동 변환 상태 ─────
+
+    private string infoBase = "";
+
+    // 선택한 곡의 영상이 변환 중이면 곡 정보 옆에 진행률을 붙인다
+    void RefreshInfoText()
+    {
+        if (infoText == null || songs.Count == 0) return;
+
+        string text = infoBase;
+        SongVideoConverter converter = SongVideoConverter.instance;
+        if (converter != null && converter.IsConverting(songs[selectedIndex].folderName, out float progress))
+            text += progress > 0f ? $"   영상 변환 중 {progress * 100f:F0}%" : "   영상 변환 대기 중";
+
+        if (infoText.text != text) infoText.text = text;
+    }
+
+    void OnVideoConverted(string songFolder)
+    {
+        if (songs.Count == 0) return;
+        if (songs[selectedIndex].folderName != songFolder) return;
+
+        RefreshInfoText();
+        RequestPreview(songs[selectedIndex]);
     }
 
     // ───── 하이라이트 미리보기 ─────
@@ -218,9 +361,9 @@ public class SongSelectUI : MonoBehaviour
         string visualPath = null;
         if (previewImage != null)
         {
-            visualPath = SongMedia.FirstExisting(folder, "preview.mp4")
+            visualPath = SongMedia.FindVideo(folder, "preview")
                 ?? SongMedia.FindImage(folder, "preview")
-                ?? SongMedia.FirstExisting(folder, "video.mp4")
+                ?? SongMedia.FindVideo(folder, "video")
                 ?? SongMedia.FindImage(folder, "bg");
         }
         bool isImage = visualPath != null && SongMedia.IsImage(visualPath);
@@ -384,6 +527,7 @@ public class SongSelectUI : MonoBehaviour
 
     void OnDestroy()
     {
+        SongVideoConverter.Converted -= OnVideoConverted;
         ReleasePreviewTexture();
         ReleasePreviewClip();
         ReleasePreviewPhoto();

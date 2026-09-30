@@ -23,7 +23,7 @@ public class note_load : MonoBehaviour
 
     void Start()
     {
-        string file_path = Path.Combine(Application.streamingAssetsPath, "map", SongSelection.songFolder, "bitmap.txt");
+        string file_path = Path.Combine(SongMedia.FolderPath(SongSelection.songFolder), "bitmap.txt");
 
         if (!File.Exists(file_path))
         {
