@@ -1,6 +1,10 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+// 이 컴포넌트가 붙은 Canvas는 AspectRatioEnforcer가 카메라 모드로 바꾸지 않고 그대로 둔다.
+// 씬 전환 커튼처럼 화면 전체(레터박스 포함)를 항상 덮어야 하는 캔버스에 붙인다
+public class KeepScreenSpaceOverlay : MonoBehaviour { }
+
 // 어떤 해상도/모니터에서도 게임 화면을 16:9로 유지하고, 남는 부분은 검은 띠로 채운다.
 // 씬에 붙일 필요 없이 게임이 시작되면 자동으로 만들어진다.
 public class AspectRatioEnforcer : MonoBehaviour
@@ -90,6 +94,7 @@ public class AspectRatioEnforcer : MonoBehaviour
         foreach (Canvas canvas in FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None))
         {
             if (!canvas.isRootCanvas) continue;
+            if (canvas.GetComponent<KeepScreenSpaceOverlay>() != null) continue;
 
             if (canvas.renderMode == RenderMode.ScreenSpaceOverlay)
             {

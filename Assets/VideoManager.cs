@@ -88,6 +88,12 @@ public class VideoManager : MonoBehaviour
         quadRenderer.enabled = false;
         player.Stop();
 
+        if (targetTexture != null)
+        {
+            Destroy(targetTexture);
+            targetTexture = null;
+        }
+
         string folder = SongMedia.FolderPath(songFolder);
         string filePath = Path.Combine(folder, "video.mp4");
 
@@ -98,9 +104,14 @@ public class VideoManager : MonoBehaviour
             return;
         }
 
-        // APIOnly 모드: VideoPlayer가 내부적으로만 디코딩하고,
-        // 매 프레임마다 player.texture를 직접 Material에 할당한다
-        player.renderMode = VideoRenderMode.APIOnly;
+        // RenderTexture 모드: VideoPlayer가 targetTexture에 직접 렌더링함
+        // 이것이 가장 표준적이고 안정적인 방식
+        player.renderMode = VideoRenderMode.RenderTexture;
+
+        // 영상 해상도에 맞춰 RenderTexture 생성 (나중에 OnPrepared에서 정확히 설정)
+        targetTexture = new RenderTexture(1920, 1080, 24, RenderTextureFormat.ARGB32);
+        targetTexture.Create();
+        player.targetTexture = targetTexture;
         player.url = filePath;
 
         Debug.Log($"[VideoManager] Prepare 시작: {filePath}");
@@ -131,19 +142,27 @@ public class VideoManager : MonoBehaviour
             return;
         }
 
-        // APIOnly 모드에서는 RenderTexture를 만들지 않음.
-        // 매 프레임마다 player.texture를 직접 할당한다.
+        // RenderTexture 크기를 영상 해상도에 맞춰 정확히 설정
+        if (targetTexture != null)
+        {
+            targetTexture.Release();
+            Destroy(targetTexture);
+        }
+        targetTexture = new RenderTexture(w, h, 24, RenderTextureFormat.ARGB32);
+        targetTexture.Create();
+        player.targetTexture = targetTexture;
+
+        // Material에 RenderTexture 할당
+        quadMaterial.SetTexture("_BaseMap", targetTexture);
 
         FitToScreen(w, h);
-
-        // 테스트: 스케일을 줄여서 카메라 범위 안에 들어오도록
-        quadTransform.localScale *= 0.4f;
 
         quadRenderer.enabled = true;
         hasVideo = true;
         videoReady = true;
 
         Debug.Log($"[VideoManager] Quad 설정 완료: worldPos={quadTransform.position}, scale={quadTransform.localScale}, renderer.enabled={quadRenderer.enabled}, material={quadRenderer.material.name}");
+        Debug.Log($"[VideoManager] RenderTexture: {w}x{h}, assigned to material._BaseMap");
         Debug.Log($"[VideoManager] Camera: pos={Camera.main.transform.position}, orthographic={Camera.main.orthographic}, orthographicSize={Camera.main.orthographicSize}, far={Camera.main.farClipPlane}");
     }
 
@@ -174,11 +193,8 @@ public class VideoManager : MonoBehaviour
 
     void Update()
     {
-        if (hasVideo && player.texture != null)
-        {
-            // URP Unlit 셰이더는 _BaseMap을 직접 써야 함
-            quadMaterial.SetTexture("_BaseMap", player.texture);
-        }
+        // RenderTexture 모드에서는 VideoPlayer가 자동으로 targetTexture에 렌더링하므로
+        // Update에서 별도의 작업이 필요 없음
     }
 
     public void Play()

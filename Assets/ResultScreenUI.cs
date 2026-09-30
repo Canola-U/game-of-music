@@ -49,6 +49,7 @@ public class ResultScreenUI : MonoBehaviour
     public Color goodColor = Hex(0x81C784);
     public Color missColor = Hex(0xEF5350);
 
+    static readonly Color godColor = Hex(0xFF1744);
     static readonly Color bgColor = Hex(0x0E0E14);
     static readonly Color panelColor = Hex(0x1B1B24);
     static readonly Color keyColor = Hex(0x2A2A35);
@@ -61,6 +62,7 @@ public class ResultScreenUI : MonoBehaviour
     int score;
     Tier tier;
     bool isNewRecord;
+    bool isPerfect;
 
     readonly List<Image> ringSegments = new List<Image>();
     readonly List<float> ringTargets = new List<float>();
@@ -103,6 +105,7 @@ public class ResultScreenUI : MonoBehaviour
         accuracy = sm.AverageAccuracy;
         score = Mathf.RoundToInt(accuracy * 10000f);
         tier = GetTier(accuracy);
+        isPerfect = accuracy >= 100f;
 
         List<ScoreRecord> records = HighScoreManager.GetRecords(SongSelection.songFolder);
         isNewRecord = records.Count == 0 || accuracy > records[0].accuracy;
@@ -334,9 +337,10 @@ public class ResultScreenUI : MonoBehaviour
             }
 
             Image bar = MakeRect("Bar", row, new Vector2(-width / 2f + 6f, 0f), new Vector2(12f, rowHeight)).gameObject.AddComponent<Image>();
-            bar.color = current ? t.color : new Color(t.color.r, t.color.g, t.color.b, 0.5f);
+            bar.color = isPerfect ? godColor : (current ? t.color : new Color(t.color.r, t.color.g, t.color.b, 0.5f));
 
-            MakeText(row, t.name, current ? 40 : 32, current ? Color.white : dimText,
+            string label = isPerfect ? "GOD" : t.name;
+            MakeText(row, label, current ? 40 : 32, current ? Color.white : dimText,
                 TextAlignmentOptions.Left, new Vector2(-width / 2f + 36f + 100f, 0f), new Vector2(200f, rowHeight), current);
 
             string range = t.minAccuracy > 0f ? t.minAccuracy.ToString("0.#", CultureInfo.InvariantCulture) + "%+" : "";
@@ -373,7 +377,7 @@ public class ResultScreenUI : MonoBehaviour
 
             Image seg = MakeRect("Segment", ring, Vector2.zero, new Vector2(ringSize, ringSize)).gameObject.AddComponent<Image>();
             seg.sprite = ringSprite;
-            seg.color = colors[i];
+            seg.color = isPerfect ? godColor : colors[i];
             seg.type = Image.Type.Filled;
             seg.fillMethod = Image.FillMethod.Radial360;
             seg.fillOrigin = (int)Image.Origin360.Top;
@@ -386,7 +390,9 @@ public class ResultScreenUI : MonoBehaviour
 
         MakeText(ring, "RANK", 28, dimText, TextAlignmentOptions.Center, new Vector2(0f, 150f), new Vector2(300f, 40f));
 
-        tierText = MakeText(ring, tier.name, 200, tier.color, TextAlignmentOptions.Center, new Vector2(0f, -10f), new Vector2(460f, 260f), true);
+        string tierLabel = isPerfect ? "GOD" : tier.name;
+        Color tierLabelColor = isPerfect ? godColor : tier.color;
+        tierText = MakeText(ring, tierLabel, 200, tierLabelColor, TextAlignmentOptions.Center, new Vector2(0f, -10f), new Vector2(460f, 260f), true);
         tierText.enableAutoSizing = true;
         tierText.fontSizeMin = 60f;
         tierText.fontSizeMax = 200f;

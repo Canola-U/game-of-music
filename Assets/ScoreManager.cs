@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class ScoreManager : MonoBehaviour
 {
@@ -92,7 +91,7 @@ public class ScoreManager : MonoBehaviour
         isGameOver = true;
         AudioManager.instance.Pause();
         VideoManager.instance.Pause();
-        SceneManager.LoadScene("resultscreen");
+        SceneFlow.instance.GoToResult();
     }
 
     public void ResetScore()
